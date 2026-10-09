@@ -1,0 +1,49 @@
+# ─────────────────────────────────────────────────────────────
+# CI Workflow — AI Summarizer API
+# ─────────────────────────────────────────────────────────────
+# This workflow runs automatically on every push or pull request.
+# It installs dependencies and runs the full test suite.
+# If any test fails, GitHub reports a red ❌ on the commit.
+# If all tests pass, GitHub reports a green ✅ on the commit.
+# ─────────────────────────────────────────────────────────────
+
+name: CI
+
+# ─── WHEN should this run? ───────────────────────────────────
+on:
+  push:
+    branches:
+      - main
+      - "GL-*"          # any branch starting with GL- (story branches)
+
+  pull_request:
+    branches:
+      - main
+
+# ─── WHAT should this do? ────────────────────────────────────
+jobs:
+  test:
+    # Run on a fresh Ubuntu virtual machine in GitHub's cloud
+    runs-on: ubuntu-latest
+
+    # Steps run in order, top to bottom
+    steps:
+      # 1. Download the code from the repo onto the runner
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Install Python 3.11 on the runner
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 3. Install project dependencies from requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4. Run the test suite with verbose output
+      - name: Run tests
+        run: pytest -v
