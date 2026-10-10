@@ -1,28 +1,23 @@
-# AI Summarizer API
+# US7 — Clear Error Messages
 
-A small REST API that accepts text and returns a concise summary.
+## What we did
+Made all error responses look the same.
 
-## Overview
+Before (two different shapes):
+- 400 → {"detail": {"error": "...", "detail": "..."}}
+- 422 → {"detail": [{"loc": [...], "msg": "...", ...}]}
 
-This service exposes a `POST /summarize` endpoint that extracts the most important
-sentences from the input text using word-frequency scoring.
+After (one shape for both):
+- 400 → {"detail": {"error": "...", "detail": "..."}}
+- 422 → {"error": "validation_error", "detail": "..."}
 
-Built with **FastAPI** and **Python**.
+Clients now parse errors the same way.
 
-## Requirements
+## Files
+- app/main.py — exception handler
+- tests/test_error_shape.py — 4 tests
 
-- Python 3.11+
-- pip
+## Improvement
+Before: clients had to write two different parsers.
 
-## Install
-
-```bash
-python -m venv .venv
-
-# Windows
-.venv\Scripts\activate
-
-# macOS / Linux
-source .venv/bin/activate
-
-pip install -r requirements.txt
+After: one parser handles all errors.
