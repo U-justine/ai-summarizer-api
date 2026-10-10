@@ -1,28 +1,18 @@
-# AI Summarizer API
+# US6 — Logging
 
-A small REST API that accepts text and returns a concise summary.
+## What we did
+The app now writes down every request in a diary.
 
-## Overview
+Example line:
+    2026-10-09 14:23:01 | INFO | GET /health -> 200 (0.9ms)
 
-This service exposes a `POST /summarize` endpoint that extracts the most important
-sentences from the input text using word-frequency scoring.
+This shows: time, method, path, status code, and how long it took.
 
-Built with **FastAPI** and **Python**.
+## Files
+- app/main.py — logging setup + middleware
+- tests/test_logging.py — 2 tests
 
-## Requirements
+## Improvement
+Before: the app was silent — no way to see what happened.
 
-- Python 3.11+
-- pip
-
-## Install
-
-```bash
-python -m venv .venv
-
-# Windows
-.venv\Scripts\activate
-
-# macOS / Linux
-source .venv/bin/activate
-
-pip install -r requirements.txt
+After: every request is recorded. If something breaks, you can look back.
