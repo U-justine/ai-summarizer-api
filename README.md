@@ -17,4 +17,5 @@ https://github.com/U-justine/ai-summarizer-api/actions
 
 ## Improvement
 Before: we had to remember to run tests manually.
+
 After: tests run on every push, no effort needed.
