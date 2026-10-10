@@ -6,34 +6,66 @@
 #   2. GET  /health    → health check (GL-5)
 #   3. POST /summarize → summarize text (GL-1 + GL-2 validation)
 #
-# GL-6: adds request logging middleware so every request is recorded.
+#   US1 (GL-1): POST /summarize — extractive summarization
+#   US2 (GL-2): input validation — 400 errors for bad input
+#   US5 (GL-5): GET /health — liveness check
+#   US6 (GL-6): request logging middleware
+#   US7 (GL-7): unified error shape for 422 responses
 # ─────────────────────────────────────────────────────────────
 
 import logging
 import time
+
+# ─── US7 (GL-7): imports for the unified error handler ──
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from app.summarizer import summarize
 
-# ─── Logging setup (GL-6) ────────────────────────────────────
-# Configure how log lines look and at what level they are recorded.
+
+# ═════════════════════════════════════════════════════════════
+# US6 (GL-6): Logging setup
+# ═════════════════════════════════════════════════════════════
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s",
 )
 logger = logging.getLogger("ai-summarizer-api")
 
-# ─── App setup ───────────────────────────────────────────────
+
+# ═════════════════════════════════════════════════════════════
+# App setup
+# ═════════════════════════════════════════════════════════════
 app = FastAPI(title="AI Summarizer API")
 
-# Maximum allowed length of input text (in characters)
+# Maximum allowed length of input text (in characters) — US2 (GL-2)
 MAX_TEXT_LENGTH = 5000
 
 
-# ─── Logging middleware (GL-6) ───────────────────────────────
-# This function runs on EVERY request. It records:
+# ═════════════════════════════════════════════════════════════
+# US7 (GL-7): Unified error handler for 422 (Pydantic) responses
+# ═════════════════════════════════════════════════════════════
+# Makes Pydantic's 422 errors use the same {error, detail} shape
+# as our custom 400 errors, so clients see one format.
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Convert Pydantic 422 errors to our standard {error, detail} shape."""
+    errors = exc.errors()
+    detail = errors[0].get("msg", "Invalid input.") if errors else "Invalid input."
+
+    return JSONResponse(
+        status_code=422,
+        content={"error": "validation_error", "detail": detail},
+    )
+
+
+# ═════════════════════════════════════════════════════════════
+# US6 (GL-6): Request logging middleware
+# ═════════════════════════════════════════════════════════════
+# Runs on EVERY request. Records:
 #   - HTTP method (GET, POST, ...)
 #   - Requested path (/health, /summarize, ...)
 #   - Response status code (200, 400, 422, ...)
@@ -51,38 +83,46 @@ async def log_requests(request: Request, call_next):
     return response
 
 
-# ─── Request / Response models (Pydantic) ────────────────────
+# ═════════════════════════════════════════════════════════════
+# Request / Response models (Pydantic)
+# ═════════════════════════════════════════════════════════════
 class SummarizeRequest(BaseModel):
-    """Shape of the POST /summarize request body."""
+    """US1 (GL-1): Shape of the POST /summarize request body."""
     text: str = Field(..., description="Text to summarize")
 
 
 class SummarizeResponse(BaseModel):
-    """Shape of a successful /summarize response."""
+    """US1 (GL-1): Shape of a successful /summarize response."""
     summary: str
 
 
 class ErrorResponse(BaseModel):
-    """Shape of a 400 error response."""
+    """US2 (GL-2): Shape of a 400 error response."""
     error: str
     detail: str
 
 
-# ─── Endpoint 1: Root (service info) ─────────────────────────
+# ═════════════════════════════════════════════════════════════
+# US1 (GL-1): Endpoint 1 — Root (service info)
+# ═════════════════════════════════════════════════════════════
 @app.get("/")
 def root():
     """Simple info endpoint — used to confirm the service is up."""
     return {"service": "ai-summarizer-api", "status": "running"}
 
 
-# ─── Endpoint 2: Health check (GL-5) ─────────────────────────
+# ═════════════════════════════════════════════════════════════
+# US5 (GL-5): Endpoint 2 — Health check
+# ═════════════════════════════════════════════════════════════
 @app.get("/health")
 def health():
     """Liveness check — monitoring tools ping this to verify the service is alive."""
     return {"status": "ok"}
 
 
-# ─── Endpoint 3: Summarize (GL-1 + GL-2) ─────────────────────
+# ═════════════════════════════════════════════════════════════
+# US1 (GL-1) + US2 (GL-2): Endpoint 3 — Summarize
+# ═════════════════════════════════════════════════════════════
 @app.post(
     "/summarize",
     response_model=SummarizeResponse,
@@ -92,28 +132,28 @@ def summarize_endpoint(payload: SummarizeRequest):
     """
     Summarize the given text.
 
-    Validation rules (GL-2):
+    Validation rules (US2 / GL-2):
       - text must be a string             → 400 invalid_input
       - text must not be empty/whitespace → 400 empty_input
       - text must be ≤ 5000 characters    → 400 input_too_long
     """
     text = payload.text
 
-    # Rule 1: text must be a string (defensive — Pydantic already enforces this)
+    # ─── US2 (GL-2): Rule 1 — must be a string ────────────────
     if text is None or not isinstance(text, str):
         raise HTTPException(
             status_code=400,
             detail={"error": "invalid_input", "detail": "Field 'text' must be a string."},
         )
 
-    # Rule 2: text must not be empty or whitespace-only
+    # ─── US2 (GL-2): Rule 2 — must not be empty/whitespace ────
     if text.strip() == "":
         raise HTTPException(
             status_code=400,
             detail={"error": "empty_input", "detail": "Field 'text' must not be empty."},
         )
 
-    # Rule 3: text must not exceed the maximum length
+    # ─── US2 (GL-2): Rule 3 — must not exceed max length ──────
     if len(text) > MAX_TEXT_LENGTH:
         raise HTTPException(
             status_code=400,
@@ -123,5 +163,5 @@ def summarize_endpoint(payload: SummarizeRequest):
             },
         )
 
-    # All checks passed — run the summarizer and return the result
+    # ─── US1 (GL-1): all checks passed → run the summarizer ───
     return SummarizeResponse(summary=summarize(text))
