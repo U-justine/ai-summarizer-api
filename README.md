@@ -16,4 +16,5 @@ Rules:
 
 ## Improvement
 Before: the app accepted empty text silently.
+
 After: it tells you exactly what's wrong.
