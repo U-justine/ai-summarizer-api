@@ -1,28 +1,17 @@
-# AI Summarizer API
+# US5 — Health Check
 
-A small REST API that accepts text and returns a concise summary.
+## What we did
+Added a URL that says "yes, I'm running".
 
-## Overview
+    GET /health → {"status": "ok"}
 
-This service exposes a `POST /summarize` endpoint that extracts the most important
-sentences from the input text using word-frequency scoring.
+Monitoring tools and servers use this to check if the app is alive.
 
-Built with **FastAPI** and **Python**.
+## Files
+- app/main.py — the endpoint
+- tests/test_health.py — 3 tests
 
-## Requirements
+## Improvement
+Before: no way to check if the app was alive from outside.
 
-- Python 3.11+
-- pip
-
-## Install
-
-```bash
-python -m venv .venv
-
-# Windows
-.venv\Scripts\activate
-
-# macOS / Linux
-source .venv/bin/activate
-
-pip install -r requirements.txt
+After: one URL tells you instantly.
