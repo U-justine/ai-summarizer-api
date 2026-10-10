@@ -1,28 +1,20 @@
-# AI Summarizer API
+# US4 — CI Pipeline
 
-A small REST API that accepts text and returns a concise summary.
+## What we did
+Set up GitHub Actions so every push runs our tests automatically.
 
-## Overview
+Every time you push code:
+1. GitHub starts a fresh Linux machine
+2. Installs the app's dependencies
+3. Runs all 19 tests
+4. Shows ✅ if they pass, ❌ if they fail
 
-This service exposes a `POST /summarize` endpoint that extracts the most important
-sentences from the input text using word-frequency scoring.
+## File
+- .github/workflows/ci.yml
 
-Built with **FastAPI** and **Python**.
+## See it in action
+https://github.com/U-justine/ai-summarizer-api/actions
 
-## Requirements
-
-- Python 3.11+
-- pip
-
-## Install
-
-```bash
-python -m venv .venv
-
-# Windows
-.venv\Scripts\activate
-
-# macOS / Linux
-source .venv/bin/activate
-
-pip install -r requirements.txt
+## Improvement
+Before: we had to remember to run tests manually.
+After: tests run on every push, no effort needed.
