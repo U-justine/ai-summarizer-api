@@ -1,28 +1,19 @@
-# AI Summarizer API
+# US2 — Input Validation
 
-A small REST API that accepts text and returns a concise summary.
+## What we did
+The app now rejects bad input with a clear message.
 
-## Overview
+Rules:
+- Empty text → error 400, says "empty_input"
+- Only spaces → error 400, says "empty_input"
+- Over 5000 characters → error 400, says "input_too_long"
+- Missing field → error 422
+- Wrong type (a number instead of text) → error 422
 
-This service exposes a `POST /summarize` endpoint that extracts the most important
-sentences from the input text using word-frequency scoring.
+## Files
+- app/main.py — added the rules
+- tests/test_validation.py — 7 tests
 
-Built with **FastAPI** and **Python**.
-
-## Requirements
-
-- Python 3.11+
-- pip
-
-## Install
-
-```bash
-python -m venv .venv
-
-# Windows
-.venv\Scripts\activate
-
-# macOS / Linux
-source .venv/bin/activate
-
-pip install -r requirements.txt
+## Improvement
+Before: the app accepted empty text silently.
+After: it tells you exactly what's wrong.
