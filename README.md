@@ -1,28 +1,19 @@
-# AI Summarizer API
+# US3 — Automated Tests
 
-A small REST API that accepts text and returns a concise summary.
+## What we did
+Wrote 19 tests that check the app works.
+They run in under 1 second and catch bugs automatically.
 
-## Overview
+## Test files
+- test_summarizer.py (3 tests)
+- test_validation.py (7 tests)
+- test_health.py (3 tests)
+- test_logging.py (2 tests)
+- test_error_shape.py (4 tests)
 
-This service exposes a `POST /summarize` endpoint that extracts the most important
-sentences from the input text using word-frequency scoring.
+## How to run
+    pytest -v
 
-Built with **FastAPI** and **Python**.
-
-## Requirements
-
-- Python 3.11+
-- pip
-
-## Install
-
-```bash
-python -m venv .venv
-
-# Windows
-.venv\Scripts\activate
-
-# macOS / Linux
-source .venv/bin/activate
-
-pip install -r requirements.txt
+## Improvement
+Before: we tested by hand (slow, easy to forget).
+After: one command runs all checks in 1 second.
