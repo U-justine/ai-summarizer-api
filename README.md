@@ -203,7 +203,7 @@ suite automatically.
 ## Where to find my work
 
 - GitHub: https://github.com/U-justine/ai-summarizer-api
-- Jira board: https://amali-tech.atlassian.net/jira/software/projects/GL/boards
+- Jira board: [https://amali-tech.atlassian.net/jira/software/projects/GL/boards](https://amali-tech.atlassian.net/jira/for-you?tab=workedon)
 - Jira list: https://amali-tech.atlassian.net/jira/software/projects/GL/list
 - CI runs: https://github.com/U-justine/ai-summarizer-api/actions
 
