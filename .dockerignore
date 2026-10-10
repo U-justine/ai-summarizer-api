@@ -1,0 +1,28 @@
+# ─────────────────────────────────────────────────────────────
+# .dockerignore — files Docker should NOT copy into the image
+# ─────────────────────────────────────────────────────────────
+# Keeps the image small and fast to build.
+
+# Virtual environment (Docker installs its own dependencies)
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Test cache
+.pytest_cache/
+
+# Git metadata
+.git/
+.gitignore
+
+# GitHub Actions config (not needed inside the container)
+.github/
+
+# Documentation and screenshots
+docs/
+
+# Local environment variables
+.env
